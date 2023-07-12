@@ -4,6 +4,7 @@ import android.graphics.RectF;
 import java.util.Random;
 
 public class Block {
+    public boolean isPassedPlayer = false;
     private RectF rect;
     private float speed;
     private float xPos, yPos; // X and Y Position of the block

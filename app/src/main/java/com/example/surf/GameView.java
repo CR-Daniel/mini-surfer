@@ -1,6 +1,7 @@
 package com.example.surf;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -12,6 +13,9 @@ import java.util.Iterator;
 import java.util.Random;
 
 public class GameView extends SurfaceView implements Runnable {
+    private int highScore = 0;
+    private int lastScore = 0;
+    private SharedPreferences preferences;
     private boolean gameStarted = false;
     private boolean gameOver = false;
     private boolean isPlaying;
@@ -27,6 +31,10 @@ public class GameView extends SurfaceView implements Runnable {
 
     public GameView(Context context, int screenX, int screenY) {
         super(context);
+
+        preferences = context.getSharedPreferences("game", Context.MODE_PRIVATE);
+        highScore = preferences.getInt("highScore", 0);
+        lastScore = preferences.getInt("lastScore", 0);
 
         this.screenX = screenX;
         this.screenY = screenY;
@@ -79,6 +87,12 @@ public class GameView extends SurfaceView implements Runnable {
             Block block = blockIterator.next();
             block.update();
 
+            // Add a score point when the block passes the player
+            if (!block.isPassedPlayer && block.getRect().top > player.getRect().bottom) {
+                score++;
+                block.isPassedPlayer = true;
+            }
+
             // End the game if the player hits an obstacle
             if (player.getRect().intersect(block.getRect())) {
                 gameOver = true;
@@ -86,7 +100,6 @@ public class GameView extends SurfaceView implements Runnable {
 
             // Remove the block if it has moved off the screen
             if (block.getRect().top > screenY) {
-                score++;
                 blockIterator.remove();
             }
         }
@@ -122,7 +135,12 @@ public class GameView extends SurfaceView implements Runnable {
             }
 
             // Draw the score
-            canvas.drawText("Score: " + score, 50, 50, scorePaint);
+            if (gameStarted) {
+                canvas.drawText("Score: " + score, 50, 50, scorePaint);
+            } else {
+                canvas.drawText("High Score: " + highScore, 50, 50, scorePaint);
+                canvas.drawText("Last Score: " + lastScore, 50, 100, scorePaint);
+            }
 
             getHolder().unlockCanvasAndPost(canvas);
         }
@@ -152,6 +170,14 @@ public class GameView extends SurfaceView implements Runnable {
     }
 
     private void resetGame() {
+        lastScore = score;
+        highScore = Math.max(score, highScore);
+
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putInt("highScore", highScore);
+        editor.putInt("lastScore", lastScore);
+        editor.apply();
+
         player = new Player(getContext(), screenX, screenY, laneWidth, numLanes);
         blocks.clear();
         gameStarted = false;
