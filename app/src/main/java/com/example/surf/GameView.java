@@ -13,6 +13,7 @@ import java.util.Iterator;
 import java.util.Random;
 
 public class GameView extends SurfaceView implements Runnable {
+    double accumulatedTime = 0;
     private int highScore = 0;
     private int lastScore = 0;
     private SharedPreferences preferences;
@@ -27,7 +28,7 @@ public class GameView extends SurfaceView implements Runnable {
     private Random random; // This is for randomizing obstacle positions
     private int screenX, screenY;
     private int laneWidth;
-    private int numLanes = 5; // Define your desired number of lanes
+    private int numLanes = 3; // Define your desired number of lanes
 
     public GameView(Context context, int screenX, int screenY) {
         super(context);
@@ -51,10 +52,11 @@ public class GameView extends SurfaceView implements Runnable {
         scorePaint.setTextSize(50);
     }
 
-    @Override
     public void run() {
+        long lastTime = System.nanoTime();
         while (isPlaying) {
-            update();
+            long now = System.nanoTime();
+            update((now - lastTime) / 1_000_000_000.0);
             draw();
             sleep();
 
@@ -67,10 +69,15 @@ public class GameView extends SurfaceView implements Runnable {
                     e.printStackTrace();
                 }
             }
+
+            lastTime = now;
         }
     }
 
-    private void update() {
+
+    private void update(double deltaTime) {
+        accumulatedTime += deltaTime;
+
         if (!gameStarted) {
             return;
         }
@@ -78,14 +85,19 @@ public class GameView extends SurfaceView implements Runnable {
         player.update();
 
         // Create a new obstacle every nth update
-        if (new Random().nextInt(100) > 95) { // adjust as needed
-            blocks.add(new Block(screenX, screenY, laneWidth, numLanes));
+        if (accumulatedTime >= 1) {
+            int newBlockLane;
+            do {
+                newBlockLane = random.nextInt(numLanes);
+            } while (newBlockLane == player.getLane() && blocks.size() > 0 && blocks.get(blocks.size()-1).getLane() == newBlockLane);
+            blocks.add(new Block(screenX, screenY, laneWidth, numLanes, newBlockLane));
+            accumulatedTime = 0;
         }
 
         Iterator<Block> blockIterator = blocks.iterator();
         while (blockIterator.hasNext()) {
             Block block = blockIterator.next();
-            block.update();
+            block.update(deltaTime);
 
             // Add a score point when the block passes the player
             if (!block.isPassedPlayer && block.getRect().top > player.getRect().bottom) {

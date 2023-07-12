@@ -33,6 +33,8 @@ public class Player {
         return rect;
     }
 
+    public int getLane() { return currentLane; }
+
     public void update() {
         // Update the rect position according to player position
         rect.left = xPos;

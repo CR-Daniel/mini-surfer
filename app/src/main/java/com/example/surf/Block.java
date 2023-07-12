@@ -10,17 +10,13 @@ public class Block {
     private float xPos, yPos; // X and Y Position of the block
     private int currentLane;
 
-    public Block(int screenX, int screenY, int laneWidth, int numLanes) {
-        // Randomly select a lane for the block to spawn in
-        Random random = new Random();
-        currentLane = random.nextInt(numLanes);
+    public Block(int screenX, int screenY, int laneWidth, int numLanes, int lane) {
+        // Use provided lane for the block to spawn in
+        currentLane = lane;
 
         // Calculate the block's initial X position based on its lane
         xPos = laneWidth * currentLane + laneWidth / 2;
         yPos = 0;
-
-        // Speed of the block
-        speed = 10;
 
         // Create a rect representing the block
         rect = new RectF(xPos, yPos, xPos + 100, yPos + 100); // Block with 100x100 pixels size
@@ -30,8 +26,11 @@ public class Block {
         return rect;
     }
 
-    public void update() {
+    public int getLane() { return currentLane; }
+
+    public void update(double deltaTime) {
         // Move the block down the screen
+        speed = (float) (500 * deltaTime);
         yPos += speed;
 
         // Update the rect position according to block position
