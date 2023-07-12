@@ -14,7 +14,8 @@ import java.util.Random;
 public class GameView extends SurfaceView implements Runnable {
     private boolean isPlaying;
     private Thread gameThread;
-    private Paint paint;
+    private int score = 0;
+    private Paint scorePaint;
     private Player player; // Cube represents the player
     private ArrayList<Block> blocks; // This will hold your obstacles
     private Random random; // This is for randomizing obstacle positions
@@ -34,9 +35,10 @@ public class GameView extends SurfaceView implements Runnable {
         blocks = new ArrayList<>();
         random = new Random();
 
-        // For drawing
-        paint = new Paint();
-        paint.setColor(Color.WHITE);
+        // Initialize the scorePaint
+        scorePaint = new Paint();
+        scorePaint.setColor(Color.WHITE);
+        scorePaint.setTextSize(50);
     }
 
     @Override
@@ -68,6 +70,7 @@ public class GameView extends SurfaceView implements Runnable {
 
             // Remove the block if it has moved off the screen
             if (block.getRect().top > screenY) {
+                score++;
                 blockIterator.remove();
             }
         }
@@ -101,6 +104,9 @@ public class GameView extends SurfaceView implements Runnable {
                 canvas.drawRect(block.getRect(), blockPaint);
                 //canvas.drawRect(block.getRect(), borderPaint);  // Draw block border
             }
+
+            // Draw the score
+            canvas.drawText("Score: " + score, 50, 50, scorePaint);
 
             getHolder().unlockCanvasAndPost(canvas);
         }
