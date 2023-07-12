@@ -12,6 +12,8 @@ import java.util.Iterator;
 import java.util.Random;
 
 public class GameView extends SurfaceView implements Runnable {
+    private boolean gameStarted = false;
+    private boolean gameOver = false;
     private boolean isPlaying;
     private Thread gameThread;
     private int score = 0;
@@ -47,10 +49,24 @@ public class GameView extends SurfaceView implements Runnable {
             update();
             draw();
             sleep();
+
+            if (gameOver) {
+                resetGame();
+                gameOver = false;
+                try {
+                    Thread.sleep(200);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
     private void update() {
+        if (!gameStarted) {
+            return;
+        }
+
         player.update();
 
         // Create a new obstacle every nth update
@@ -65,7 +81,7 @@ public class GameView extends SurfaceView implements Runnable {
 
             // End the game if the player hits an obstacle
             if (player.getRect().intersect(block.getRect())) {
-                isPlaying = false;
+                gameOver = true;
             }
 
             // Remove the block if it has moved off the screen
@@ -135,17 +151,29 @@ public class GameView extends SurfaceView implements Runnable {
         }
     }
 
+    private void resetGame() {
+        player = new Player(getContext(), screenX, screenY, laneWidth, numLanes);
+        blocks.clear();
+        gameStarted = false;
+        score = 0;
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                // Determine which half of the screen was touched
-                if (event.getX() < screenX / 2) {
-                    // Move cube to left lane
-                    player.moveLeft();
+                if (!gameStarted) {
+                    gameStarted = true;
+                    isPlaying = true;
                 } else {
-                    // Move cube to right lane
-                    player.moveRight();
+                    // Determine which half of the screen was touched
+                    if (event.getX() < screenX / 2) {
+                        // Move cube to left lane
+                        player.moveLeft();
+                    } else {
+                        // Move cube to right lane
+                        player.moveRight();
+                    }
                 }
                 break;
         }
