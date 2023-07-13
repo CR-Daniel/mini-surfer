@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.RectF;
 import android.view.MotionEvent;
 import android.view.SurfaceView;
 
@@ -91,10 +92,7 @@ public class GameView extends SurfaceView implements Runnable {
 
         // Create a new obstacle every nth update
         if (accumulatedTime >= 0.75f) {
-            int newBlockLane;
-            do {
-                newBlockLane = random.nextInt(numLanes);
-            } while (newBlockLane == player.getLane() && blocks.size() > 0 && blocks.get(blocks.size()-1).getLane() == newBlockLane);
+            int newBlockLane = random.nextInt(numLanes);
             blocks.add(new Block(screenX, screenY, laneWidth, numLanes, newBlockLane));
             accumulatedTime = 0;
         }
@@ -160,10 +158,17 @@ public class GameView extends SurfaceView implements Runnable {
                 canvas.drawRect(block.getRect(), borderPaint);  // Draw block border
             }
 
+            Paint backgroundPaint = new Paint();
+            backgroundPaint.setColor(Color.GRAY);
+
             // Draw the score
             if (gameStarted) {
+                RectF scoreBackground = new RectF(0, 0, 300, 80);
+                canvas.drawRect(scoreBackground, backgroundPaint);
                 canvas.drawText("Score: " + score, 50, 50, scorePaint);
             } else {
+                RectF scoreBackground = new RectF(0, 0, 400, 120);
+                canvas.drawRect(scoreBackground, backgroundPaint);
                 canvas.drawText("High Score: " + highScore, 50, 50, scorePaint);
                 canvas.drawText("Last Score: " + lastScore, 50, 100, scorePaint);
             }
