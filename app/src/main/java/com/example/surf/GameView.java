@@ -48,7 +48,7 @@ public class GameView extends SurfaceView implements Runnable {
 
         // Initialize the scorePaint
         scorePaint = new Paint();
-        scorePaint.setColor(Color.WHITE);
+        scorePaint.setColor(Color.GREEN);
         scorePaint.setTextSize(50);
     }
 
@@ -129,6 +129,15 @@ public class GameView extends SurfaceView implements Runnable {
             // clear the screen with black color
             canvas.drawColor(Color.BLACK);
 
+            // Draw lines for each lane
+            Paint linePaint = new Paint();
+            linePaint.setColor(Color.WHITE);
+            linePaint.setStrokeWidth(10);
+            for (int i = 0; i < numLanes; i++) {
+                float linePos = laneWidth * i + laneWidth / 2;
+                canvas.drawLine(linePos, 0, linePos, screenY, linePaint);
+            }
+
             // Define colors for the player and blocks
             Paint playerPaint = new Paint();
             playerPaint.setColor(Color.BLUE);
@@ -139,16 +148,16 @@ public class GameView extends SurfaceView implements Runnable {
             Paint borderPaint = new Paint();
             borderPaint.setColor(Color.WHITE);
             borderPaint.setStyle(Paint.Style.STROKE);
-            borderPaint.setStrokeWidth(4);
+            borderPaint.setStrokeWidth(10);
 
             // Draw the player
             canvas.drawRect(player.getRect(), playerPaint);
-            //canvas.drawRect(player.getRect(), borderPaint);  // Draw player border
+            canvas.drawRect(player.getRect(), borderPaint);  // Draw player border
 
             // Draw the blocks
             for (Block block : blocks) {
                 canvas.drawRect(block.getRect(), blockPaint);
-                //canvas.drawRect(block.getRect(), borderPaint);  // Draw block border
+                canvas.drawRect(block.getRect(), borderPaint);  // Draw block border
             }
 
             // Draw the score
