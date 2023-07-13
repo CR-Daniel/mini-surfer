@@ -82,10 +82,15 @@ public class GameView extends SurfaceView implements Runnable {
             return;
         }
 
-        player.update();
+        player.update(deltaTime);
+
+        // End the game if the player goes off-screen
+        if (player.getYPos() <= 0 || player.getYPos() + player.getHeight() >= screenY) {
+            gameOver = true;
+        }
 
         // Create a new obstacle every nth update
-        if (accumulatedTime >= 1) {
+        if (accumulatedTime >= 0.75f) {
             int newBlockLane;
             do {
                 newBlockLane = random.nextInt(numLanes);
@@ -212,6 +217,7 @@ public class GameView extends SurfaceView implements Runnable {
                         // Move cube to right lane
                         player.moveRight();
                     }
+                    player.jump();
                 }
                 break;
         }
